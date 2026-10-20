@@ -55,7 +55,7 @@ const uid=()=>'i'+Math.random().toString(36).slice(2,9);
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 const clone=o=>JSON.parse(JSON.stringify(o));
 const USER_PREFS_KEY='museum-display-preferences';
-const USER_PREFS_DEFAULTS={language:'vi',graphics:'balanced',volume:.8,narration:null};
+const USER_PREFS_DEFAULTS={language:'vi',graphics:'balanced',volume:.8};
 const GRAPHICS_PIXEL_RATIOS={balanced:1.25,high:1.5,ultra:2,device:3};
 function loadUserPrefs(){
   try{
@@ -64,8 +64,7 @@ function loadUserPrefs(){
     return {
       language:stored.language==='en'?'en':'vi',
       graphics:Object.hasOwn(GRAPHICS_PIXEL_RATIOS,stored.graphics)?stored.graphics:'balanced',
-      volume:Number.isFinite(+stored.volume)?Math.min(1,Math.max(0,+stored.volume)):.8,
-      narration:typeof stored.narration==='boolean'?stored.narration:null
+      volume:Number.isFinite(+stored.volume)?Math.min(1,Math.max(0,+stored.volume)):.8
     };
   }catch(error){
     console.error('Không thể đọc tùy chọn hiển thị đã lưu.',error);
@@ -378,7 +377,7 @@ Chúng ta sẽ lần lượt đi qua các phòng trưng bày. Hãy quan sát th�
   outro:`Buổi tham quan đến đây là kết thúc.
 Hãy cùng thảo luận: theo các em, yếu tố nào đã làm nên thắng lợi của chiến dịch?`
 },
-settings:{transition:'curtain',voice:false,rate:1},
+settings:{transition:'curtain'},
 items:[
 {id:'keo-phao',type:'tranh',art:'keo-phao',title:'Kéo pháo vào trận địa',date:'Tranh minh hoạ, đầu năm 1954',origin:'Hình minh hoạ mẫu, có thể thay bằng tranh thật',
  detail:`Đầu năm 1954, những khẩu pháo lớn được đưa lên các sườn núi quanh lòng chảo Điện Biên Phủ hoàn toàn bằng sức người, qua những con đường rừng dốc hẹp do bộ đội và dân công mở.
@@ -478,7 +477,7 @@ Chúng ta sẽ cùng tìm hiểu vì sao quân ít hơn lại có thể đánh t
   outro:`Buổi tham quan đến đây là kết thúc.
 Hãy cùng thảo luận: vì sao Nguyễn Huệ chọn đánh ở khúc sông này, và điều đó cho thấy gì về nghệ thuật quân sự của ông?`
 },
-settings:{transition:'curtain',voice:true,rate:1,voiceName:'',tourMinutes:4},
+settings:{transition:'curtain',tourMinutes:4},
 items:[
 {id:'boi-canh',type:'tailieu',art:'',title:'Bối cảnh: quân Xiêm kéo vào Gia Định',date:'Tóm lược tư liệu, năm 1784',origin:'Tổng hợp từ sách giáo khoa Lịch sử 8, nên thay bằng văn bản gốc',
  detail:`Đây là tư liệu về bối cảnh dẫn đến trận Rạch Gầm – Xoài Mút.
@@ -571,7 +570,7 @@ Chiêu Tăng, Chiêu Sương cùng một số tàn quân chạy qua Chân Lạp 
 
 const THANH={
 meta:{title:'Bảo tàng ảo',war:'Kháng chiến chống quân Thanh (1788 – 1789)',subtitle:'Nguyễn Huệ lên ngôi Hoàng đế, lấy niên hiệu Quang Trung, rồi chỉ huy chiến dịch giải phóng Thăng Long.',welcome:'Cùng tìm hiểu chiến dịch chống quân Thanh và chiến thắng Ngọc Hồi – Đống Đa dưới sự chỉ huy của Hoàng đế Quang Trung.',outro:'Hãy cùng thảo luận: địa hình, thời cơ và cách tổ chức tiến công đã góp phần làm nên chiến thắng như thế nào?'},
-settings:{transition:'curtain',voice:true,rate:1,voiceName:'',tourMinutes:4},
+settings:{transition:'curtain',tourMinutes:4},
 items:[
 {id:'thanh-hanh-quan',campaign:'thanh',type:'dohoa',title:'Hành quân thần tốc ra Bắc',date:'Cuối năm 1788 – đầu năm 1789',origin:'Sơ đồ khái quát, không theo tỉ lệ',detail:'Quang Trung lên ngôi Hoàng đế tại Phú Xuân, rồi tổ chức hành quân ra Bắc. Đạo quân tiến qua Tam Điệp và chia hướng đánh vào các đồn lũy bảo vệ Thăng Long.',text:'Phú Xuân → Tam Điệp → Thăng Long. Các mũi tiến công được phối hợp để đánh vào hệ thống phòng thủ của quân Thanh trong dịp Tết Kỷ Dậu.',script:'Quang Trung lên ngôi Hoàng đế ở Phú Xuân rồi tiến quân ra Bắc. Từ Tam Điệp, quân Tây Sơn chia hướng, phối hợp tiến công các đồn lũy của quân Thanh.',question:'Việc chọn thời điểm Tết có ý nghĩa gì đối với yếu tố bất ngờ?',img:'',art:'',phases:'',hotspots:'',inTour:true},
 {id:'thanh-tran-dia',campaign:'thanh',type:'sahinh',title:'Sa hình chiến dịch Ngọc Hồi – Đống Đa',date:'Tết Kỷ Dậu, 1789',origin:'Mô hình khái quát, không theo tỉ lệ',detail:'Sa hình thể hiện các hướng tiến công của quân Tây Sơn từ Tam Điệp vào các đồn lũy phía nam Thăng Long và trận Đống Đa.',text:'Từ căn cứ Tam Điệp, quân Tây Sơn tiến công dồn dập. Đồn Ngọc Hồi bị đánh ở cửa ngõ phía nam; đạo quân của Đô đốc Long tiến vào Đống Đa. Quân Thanh rút chạy khỏi Thăng Long.',script:'Đêm mồng bốn Tết Kỷ Dậu, quân Tây Sơn tiến công các đồn tiền tiêu. Rạng sáng mồng năm, trận Ngọc Hồi và mũi tiến công vào Đống Đa làm tan vỡ hệ thống phòng thủ phía nam Thăng Long. Quân Thanh tháo chạy, Quang Trung tiến vào Thăng Long.',question:'Vì sao cần phối hợp nhiều mũi tiến công thay vì chỉ đánh một cửa?',img:'',art:'',phases:'Đêm mồng bốn Tết: tiến công đồn tiền tiêu\nRạng sáng mồng năm: đánh Ngọc Hồi và Đống Đa\nQuân Thanh rút khỏi Thăng Long',hotspots:'24 | 72 | 1 | Tam Điệp | Căn cứ tập kết và xuất phát của quân Tây Sơn trước cuộc tiến công ra Bắc.\n70 | 74 | 1 | Đồn Ngọc Hồi | Cửa ngõ phía nam Thăng Long, nơi diễn ra trận đánh lớn trong ngày mồng năm Tết Kỷ Dậu.\n78 | 51 | 2 | Đống Đa | Hướng tiến công của đạo quân Đô đốc Long, đánh vào lực lượng quân Thanh ở phía tây nam thành.\n52 | 24 | 2 | Thăng Long | Quang Trung tiến vào kinh thành sau khi quân Thanh rút chạy.',inTour:true},
@@ -600,6 +599,9 @@ function norm(d){
   const base=clone(DEFAULT);
   d.meta=Object.assign({},base.meta,d.meta||{});
   d.settings=Object.assign({},base.settings,d.settings||{});
+  delete d.settings.voice;
+  delete d.settings.voiceName;
+  delete d.settings.rate;
   d.resources=Array.isArray(d.resources)?d.resources:[];
   d.videos=Array.isArray(d.videos)?d.videos:[];
   d.items=(d.items||[]).map(it=>Object.assign({id:uid(),type:'tranh',title:'',date:'',origin:'',detail:'',script:'',question:'',img:'',art:'',text:'',phases:'',hotspots:'',inTour:true,gallerySlot:''},it));
@@ -625,7 +627,6 @@ function load(){
   return norm(d);
 }
 let S=load(), saveT=null,saveChain=Promise.resolve();
-if(USER_PREFS.narration!==null)S.settings.voice=USER_PREFS.narration;
 let dataDirty=false;
 let driveAccessToken='',driveTokenClient=null,driveEditorAuthorized=false;
 function driveConfigured(){return !!(DRIVE_CONFIG.clientId&&DRIVE_CONFIG.apiKey&&DRIVE_CONFIG.folderId)}
@@ -849,8 +850,26 @@ function applyMeta(){
   $('#entryEye').textContent=m.title;$('#entryTitle').textContent=m.war;$('#entrySub').textContent=m.subtitle;
   $('#hallEye').textContent=m.title;$('#hallWar').textContent=m.war;$('#hallSub').textContent=m.subtitle;
   $('#fxSel').value=S.settings.transition;
-  $('#voiceBtn').textContent=S.settings.voice?'🔊 Giọng đọc: Bật':'🔇 Giọng đọc: Tắt';
 }
+function setTopMenuOpen(open){
+  const menu=$('#topMenu'),button=$('#topMenuToggle');
+  menu.hidden=!open;button.setAttribute('aria-expanded',String(open));
+  button.setAttribute('aria-label',open?'Đóng menu chức năng':'Mở menu chức năng');
+}
+$('#topMenuToggle').onclick=()=>setTopMenuOpen($('#topMenu').hidden);
+$('#topMenu').addEventListener('click',event=>{
+  if(event.target.closest('button'))setTopMenuOpen(false);
+});
+document.addEventListener('click',event=>{
+  if(!$('#topMenu').hidden&&!$('#topbar').contains(event.target))setTopMenuOpen(false);
+});
+document.addEventListener('keydown',event=>{
+  if(event.key==='Escape'&&(!$('#topMenu').hidden||($('#walk3d')&&!$('#walkMenu').hidden))){
+    setTopMenuOpen(false);
+    if($('#walk3d'))setWalkMenuOpen(false);
+    event.stopImmediatePropagation();
+  }
+});
 function applySettingsLanguage(){
   const english=USER_PREFS.language==='en';
   $('#settings').lang=english?'en':'vi';
@@ -862,7 +881,6 @@ function applySettingsLanguage(){
     ?'Anti-aliasing and shadows always stay enabled. Higher resolution may affect performance on slower devices.'
     :'Khử răng cưa và bóng đổ luôn bật. Độ phân giải cao hơn có thể ảnh hưởng tốc độ trên thiết bị yếu.';
   $('#settingsVolumeLabel').firstChild.textContent=english?'Volume ':'Âm lượng ';
-  $('#settingsNarration').parentElement.lastChild.textContent=english?' Enable spoken narration':' Bật thuyết minh bằng giọng nói';
   $('#settingsLanguageHint').textContent=english
     ?'Settings and a few controls change language. Exhibit names, descriptions and narration remain in their original language.'
     :'Ngôn ngữ áp dụng cho bảng cài đặt và một số nút; tên, mô tả, thuyết minh hiện vật giữ nguyên ngôn ngữ gốc.';
@@ -891,7 +909,6 @@ function updateSettingsControls(){
   $('#settingsGraphics').value=USER_PREFS.graphics;
   $('#settingsVolume').value=Math.round(USER_PREFS.volume*100);
   $('#settingsVolumeValue').textContent=`${Math.round(USER_PREFS.volume*100)}%`;
-  $('#settingsNarration').checked=!!S.settings.voice;
 }
 let resumeBattleAfterSettings=false;
 function openSettings(){
@@ -930,11 +947,6 @@ $('#settingsVolume').addEventListener('input',event=>{
   document.querySelectorAll('video').forEach(video=>{if(!video.muted)video.volume=USER_PREFS.volume});
 });
 $('#settingsVolume').addEventListener('change',persistUserPrefs);
-$('#settingsNarration').addEventListener('change',event=>{
-  S.settings.voice=event.target.checked;USER_PREFS.narration=S.settings.voice;persistUserPrefs();save();applyMeta();
-  if(!S.settings.voice)stopNarration();
-});
-
 /* ====================== CHUYỂN CẢNH ====================== */
 async function transition(cb,origin){
   const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -1040,10 +1052,10 @@ function renderRoom(it){
   <aside class="info"><span class="badge">${TYPES[it.type].icon} ${TYPES[it.type].label}</span><h2>${esc(it.title)}</h2>
   <p class="meta">${esc([it.date,it.origin].filter(Boolean).join(' - '))}</p><div class="detail">${det}</div>
   ${it.question?`<div class="think"><b>Câu hỏi suy ngẫm</b><p>${esc(it.question)}</p></div>`:''}
-  <div class="actions"><button class="btn primary" id="speakBtn">🔊 Nghe thuyết minh</button><button class="btn" id="prevBtn">‹ Hiện vật trước</button><button class="btn" id="nextBtn">Hiện vật sau ›</button><button class="btn" id="backBtn">Về sảnh chính</button></div></aside></div>`;
+  <div class="actions"><button class="btn" id="prevBtn">‹ Hiện vật trước</button><button class="btn" id="nextBtn">Hiện vật sau ›</button><button class="btn" id="backBtn">Về sảnh chính</button></div></aside></div>`;
   if(it.type==='tailieu') bindResourceDownloads(r);
   if(it.type==='phim'){F.t=0;F.shown=-1;F.mode='idle';filmDraw()}
-  updateSpeakBtn(false);
+  updatePlaybackBtn(false);
 }
 function bindResourceDownloads(room){
   const list=room.querySelector('#resource-file-list');
@@ -1071,11 +1083,10 @@ function openLightbox(it){
 
 /* ====================== THUYẾT MINH TỰ ĐỘNG ====================== */
 const T={on:false,paused:false,idx:-1,list:[],run:0,timer:null,t0:0,target:240,remChars:0,remLines:0,remItems:0,cps1:13};
-const N={tok:0,t:null,speaking:false,warned:false};
+const N={tok:0,t:null,speaking:false};
 const F={active:false,raf:0,t:0,si:0,s0:0,dur:1,mode:'idle',last:0,shown:-1};
 const strip=s=>String(s).replace(/^\[\d+\]\s*/,'');
 const narrLines=it=>{let ls=lines(it.script);if(!ls.length)ls=lines(it.detail).slice(0,2);return ls};
-const hasSpeech=()=>'speechSynthesis' in window;
 function showCaption(t){
   const c=$('#caption');$('#capText').textContent=t;c.classList.add('show');document.body.classList.add('cap-on');
   requestAnimationFrame(()=>document.documentElement.style.setProperty('--cap-h',c.offsetHeight+'px'));
@@ -1084,50 +1095,30 @@ function hideCaption(){
   $('#caption').classList.remove('show');document.body.classList.remove('cap-on');
   document.documentElement.style.setProperty('--cap-h','0px');
 }
-function viVoices(){try{return speechSynthesis.getVoices().filter(v=>/^vi/i.test(v.lang))}catch(e){return[]}}
-function pickVoice(){
-  const vs=viVoices();if(!vs.length)return null;
-  if(S.settings.voiceName){const m=vs.find(v=>v.name===S.settings.voiceName);if(m)return m}
-  const male=/nam\s?minh|\bmale\b|\bnam\b/i,fem=/hoai\s?my|hoài\s?my|linh|female|nữ|\bmai\b|\blan\b/i;
-  return vs.find(v=>fem.test(v.name)&&!male.test(v.name))||vs.find(v=>!male.test(v.name))||vs[0];
-}
-function canVoice(){
-  if(!S.settings.voice||!hasSpeech())return false;
-  const all=speechSynthesis.getVoices();
-  return all.length===0||viVoices().length>0;
-}
 function curRate(){
-  if(!T.on||!T.target)return +S.settings.rate||1;
+  if(!T.on||!T.target)return 1;
   const el=(performance.now()-T.t0)/1000;
   const rem=T.target-el-T.remItems*3.2-2-T.remLines*.45;
   const need=T.remChars/Math.max(25,rem)/T.cps1;
   return Math.min(1.45,Math.max(.85,need));
 }
-function updateSpeakBtn(on){
+function updatePlaybackBtn(on){
   N.speaking=on;
-  const film=($('#room').dataset.type==='phim');
-  const lab=film?(on?'⏹ Dừng phim':'▶ Phát phim'):(on?'⏹ Dừng thuyết minh':'🔊 Nghe thuyết minh');
-  const b=$('#speakBtn'),f=$('#fPlay');
-  if(b){b.hidden=T.on||film;b.textContent=lab}
-  if(f){f.hidden=T.on;f.textContent=lab}
+  const f=$('#fPlay');
+  if(f){f.hidden=T.on;f.textContent=on?'⏸ Tạm dừng phim':'▶ Phát phim'}
 }
 function stopNarration(keepCap){
   N.tok++;clearTimeout(N.t);clearTimeout(T.timer);
-  try{if(hasSpeech())speechSynthesis.cancel()}catch(e){}
   if(!keepCap)hideCaption();
-  updateSpeakBtn(false);
+  updatePlaybackBtn(false);
 }
 function narrate(ls,{onLine,onDone}={}){
   stopNarration(true);
-  const my=N.tok;let i=0;updateSpeakBtn(true);
-  if(S.settings.voice&&hasSpeech()&&!N.warned){
-    const all=speechSynthesis.getVoices();
-    if(all.length&&!all.some(v=>/^vi/i.test(v.lang))){N.warned=true;toast('Máy chưa có giọng tiếng Việt nên phần thuyết minh chỉ hiện phụ đề. Hãy dùng trình duyệt Microsoft Edge (giọng Hoài My) hoặc cài giọng vi-VN trong hệ điều hành.')}
-  }
+  const my=N.tok;let i=0;updatePlaybackBtn(true);
   const step=()=>{
     if(my!==N.tok)return;
     if(i>=ls.length){
-      updateSpeakBtn(false);
+      updatePlaybackBtn(false);
       if(!T.on)setTimeout(()=>{if(N.tok===my)hideCaption()},2200);
       if(onDone)onDone();
       return;
@@ -1138,20 +1129,7 @@ function narrate(ls,{onLine,onDone}={}){
     const idx=i;i++;
     if(onLine)onLine(idx,raw,est);
     showCaption(text);
-    let fired=false;
-    const adv=d=>{if(fired||my!==N.tok)return;fired=true;clearTimeout(N.t);N.t=setTimeout(step,d)};
-    if(canVoice()){
-      try{
-        const u=new SpeechSynthesisUtterance(text);u.lang='vi-VN';u.rate=rate;
-        u.volume=USER_PREFS.volume;
-        const v=pickVoice();if(v){u.voice=v;u.lang=v.lang}else u.pitch=1.1;
-        const t0=performance.now();
-        u.onend=()=>{const dt=(performance.now()-t0)/1000;if(dt>1.2)T.cps1=.6*T.cps1+.4*Math.min(30,Math.max(6,text.length/dt*rate));adv(450)};
-        u.onerror=()=>adv(est);
-        speechSynthesis.speak(u);
-        clearTimeout(N.t);N.t=setTimeout(()=>adv(0),est*2.2+6000);
-      }catch(e){adv(est)}
-    }else adv(est);
+    N.t=setTimeout(step,est);
   };
   step();
 }
@@ -1206,7 +1184,7 @@ function setTourUI(){
   $('#tourIdle').hidden=T.on;$('#tourRun').hidden=!T.on;
   $('#tPause').textContent=T.paused?'▶ Tiếp tục':'⏸ Tạm dừng';
   $('#tProg').textContent=T.on&&T.idx>=0&&T.idx<T.list.length?`Hiện vật ${T.idx+1}/${T.list.length}`:'';
-  updateSpeakBtn(N.speaking);
+  updatePlaybackBtn(N.speaking);
 }
 function endTour(){T.on=false;T.paused=false;T.run++;stopNarration();setTourUI()}
 async function startTour(){
@@ -1261,13 +1239,6 @@ $('#tStop').onclick=()=>{endTour();toast('Đã dừng tham quan tự động.')}
 $('#brand').onclick=e=>{if(cur.view!=='hall')userNav('hall',null,{x:e.clientX,y:e.clientY})};
 $('#fxSel').innerHTML=FX.map(([v,l])=>`<option value="${v}">${l}</option>`).join('');
 $('#fxSel').onchange=e=>{S.settings.transition=e.target.value;save()};
-$('#voiceBtn').onclick=()=>{
-  S.settings.voice=!S.settings.voice;USER_PREFS.narration=S.settings.voice;persistUserPrefs();save();applyMeta();
-  if(S.settings.voice){
-    if(!('speechSynthesis' in window))toast('Trình duyệt này không hỗ trợ đọc giọng nói. Phần thuyết minh vẫn hiện dạng phụ đề.');
-    else setTimeout(()=>{const vs=speechSynthesis.getVoices();if(vs.length&&!vs.some(v=>/^vi/i.test(v.lang)))toast('Máy chưa có giọng tiếng Việt. Hãy cài giọng vi-VN trong hệ điều hành hoặc tắt giọng đọc (chỉ dùng phụ đề).')},400);
-  }else try{speechSynthesis.cancel()}catch(e){}
-};
 $('#chips').onclick=e=>{const b=e.target.closest('[data-f]');if(!b)return;hallFilter=b.dataset.f;renderHall()};
 $('#hallBody').onclick=e=>{const b=e.target.closest('.exhibit');if(b)userNav('room',b.dataset.id,{x:e.clientX,y:e.clientY})};
 $('#room').addEventListener('click',e=>{
@@ -1276,7 +1247,7 @@ $('#room').addEventListener('click',e=>{
   else if(e.target.closest('#toneBtn')){const p=$('#photo');p.classList.toggle('color');e.target.textContent=p.classList.contains('color')?'Xem ảnh tông cổ điển':'Xem ảnh màu gốc'}
   else if(e.target.closest('.hs'))activateHot(+e.target.closest('.hs').dataset.i);
   else if(e.target.closest('[data-ph]'))setPhase(+e.target.closest('[data-ph]').dataset.ph);
-  else if(e.target.closest('#speakBtn')||e.target.closest('#fPlay'))togglePlay(it);
+  else if(e.target.closest('#fPlay'))togglePlay(it);
   else if(e.target.closest('#prevBtn'))stepRoom(-1);
   else if(e.target.closest('#nextBtn'))stepRoom(1);
   else if(e.target.closest('#backBtn'))userNav('hall',null,{x:e.clientX,y:e.clientY});
@@ -1373,19 +1344,15 @@ function formHTML(it){
   ${galleryPosition}
   ${isDoc?`<div class="fld"><label>Nội dung tư liệu (mỗi dòng là một đoạn, hiện trên tờ giấy tư liệu)</label><textarea data-k="text" style="min-height:140px">${esc(it.text)}</textarea></div>`:''}
   <div class="fld"><label>Mô tả chi tiết (hiện ở khung thông tin bên phải, mỗi dòng là một đoạn)</label><textarea data-k="detail">${esc(it.detail)}</textarea></div>
-  <div class="fld"><label>Kịch bản thuyết minh (mỗi dòng là một đoạn, hiện thành phụ đề và đọc to khi tham quan tự động)</label><textarea data-k="script" style="min-height:130px">${esc(it.script)}</textarea></div>
+  <div class="fld"><label>Nội dung thuyết minh (mỗi dòng là một đoạn, hiện thành phụ đề khi tham quan tự động)</label><textarea data-k="script" style="min-height:130px">${esc(it.script)}</textarea></div>
   <div class="fld"><label>Câu hỏi suy ngẫm cho học sinh (có thể để trống)</label><textarea data-k="question" style="min-height:60px">${esc(it.question)}</textarea></div>
   ${isMap?`<div class="fld"><label>Các đợt hoặc giai đoạn (mỗi dòng là một nút lọc trên sa hình, có thể để trống)</label><textarea data-k="phases" style="min-height:70px">${esc(it.phases)}</textarea></div>
   <div class="fld"><label>Điểm chú thích (mỗi dòng: x | y | số đợt | tên | mô tả)</label><textarea data-k="hotspots" style="min-height:150px">${esc(it.hotspots)}</textarea></div>
-  <div class="help">x và y là vị trí theo phần trăm (0 đến 100). Cách nhanh nhất là nhấn trực tiếp lên sa hình ở trên để thêm dòng mới. Trong kịch bản thuyết minh, dòng bắt đầu bằng <b>[2]</b> sẽ làm nổi bật điểm chú thích số 2 khi dòng đó được đọc.</div>`:''}
+  <div class="help">x và y là vị trí theo phần trăm (0 đến 100). Cách nhanh nhất là nhấn trực tiếp lên sa hình ở trên để thêm dòng mới. Trong kịch bản thuyết minh, dòng bắt đầu bằng <b>[2]</b> sẽ làm nổi bật điểm chú thích số 2 khi dòng đó xuất hiện.</div>`:''}
   <div class="fld"><label><input type="checkbox" data-k="inTour" ${it.inTour!==false?'checked':''}> Đưa hiện vật này vào lộ trình tham quan tự động</label></div>`;
 }
-function viVoiceOptions(){
-  const vs=viVoices();
-  return `<option value="">Tự chọn giọng nữ tiếng Việt (khuyến nghị)</option>`+vs.map(v=>`<option value="${esc(v.name)}" ${S.settings.voiceName===v.name?'selected':''}>${esc(v.name)} (${esc(v.lang)})</option>`).join('');
-}
 function edMuseum(){
-  const m=S.meta,s=S.settings,nv=viVoices().length;
+  const m=S.meta,s=S.settings;
   return `<div class="ed-pane" style="max-width:780px">
   <div class="fld"><label>Tên bảo tàng</label><input type="text" data-m="title" value="${esc(m.title)}"></div>
   <div class="fld"><label>Cuộc chiến tranh hoặc chủ đề (hiện làm tiêu đề lớn)</label><input type="text" data-m="war" value="${esc(m.war)}"></div>
@@ -1396,14 +1363,7 @@ function edMuseum(){
     <div class="fld"><label>Hiệu ứng chuyển cảnh</label><select data-s="transition">${FX.map(([v,l])=>`<option value="${v}" ${s.transition===v?'selected':''}>${l}</option>`).join('')}</select></div>
     <div class="fld"><label>Thời lượng tham quan tự động (phút)</label><input type="number" min="1" max="20" step="0.5" data-s="tourMinutes" value="${esc(s.tourMinutes)}"></div>
   </div>
-  <div class="help">Khi tham quan tự động, phần mềm tự điều chỉnh tốc độ đọc để cả buổi dài xấp xỉ số phút bạn đặt (giới hạn tốc độ đọc từ chậm 0,85 đến nhanh 1,45 lần). Nếu nội dung quá dài so với thời lượng, buổi tham quan sẽ dài hơn một chút.</div>
-  <div class="fld"><label><input type="checkbox" data-s="voice" ${s.voice?'checked':''}> Đọc to phần thuyết minh bằng giọng nói của trình duyệt</label></div>
-  <div class="row2">
-    <div class="fld"><label>Giọng đọc</label><select data-s="voiceName">${viVoiceOptions()}</select></div>
-    <div class="fld"><label>Tốc độ đọc khi nghe riêng từng hiện vật: <span id="rateVal">${s.rate}</span></label><input type="range" min="0.7" max="1.3" step="0.1" data-s="rate" value="${s.rate}"></div>
-  </div>
-  <div class="fld"><button class="btn" id="voiceTest" style="justify-self:start">🔊 Nghe thử giọng</button></div>
-  <div class="help">${nv?`Máy này có ${nv} giọng tiếng Việt. Phần mềm ưu tiên giọng nữ, giọng tiếng Việt chuẩn của hệ thống (thường là giọng Bắc). Nếu giọng chưa như ý, hãy chọn một giọng khác trong danh sách.`:'Chưa thấy giọng tiếng Việt nào trên máy này. Trên Microsoft Edge có giọng nữ "Microsoft HoaiMy" (vi-VN) rất tự nhiên; trên máy Mac và iPhone có giọng "Linh". Nếu chưa có giọng, phần thuyết minh vẫn hiện dạng phụ đề.'} Giọng đọc do trình duyệt và hệ điều hành cung cấp nên mỗi máy có thể khác nhau.</div>
+  <div class="help">Khi tham quan tự động, nội dung thuyết minh sẽ lần lượt hiện thành phụ đề. Thời lượng hiển thị được điều chỉnh theo số phút bạn đặt; nội dung quá dài có thể khiến buổi tham quan kéo dài hơn dự kiến.</div>
   </div>`;
 }
 function edResources(){
@@ -1496,8 +1456,6 @@ edBody.addEventListener('input',e=>{
   }else if(m){S.meta[m]=t.value;queueSave()}
   else if(s){
     S.settings[s]=t.type==='checkbox'?t.checked:(t.type==='range'||t.type==='number')?parseFloat(t.value):t.value;
-    if(s==='rate')$('#rateVal').textContent=S.settings.rate;
-    if(s==='voice'){USER_PREFS.narration=!!S.settings.voice;persistUserPrefs();}
     applyMeta();queueSave();
   }
 });
@@ -1609,10 +1567,6 @@ edBody.addEventListener('click',e=>{
     }
     return;
   }
-  if(t.closest('#voiceTest')){
-    try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance('Chào các em, đây là giọng đọc thuyết minh của bảo tàng ảo.');u.lang='vi-VN';u.rate=+S.settings.rate||1;u.volume=USER_PREFS.volume;const v=pickVoice();if(v){u.voice=v;u.lang=v.lang}else u.pitch=1.1;speechSynthesis.speak(u)}catch(err){toast('Trình duyệt này không hỗ trợ đọc giọng nói.')}
-    return;
-  }
   if(t.closest('#exportJson'))download(slug(S.meta.war)+'-sao-luu.json',JSON.stringify(S,null,2),'application/json');
   if(t.closest('#exportHtml')){
     const json=JSON.stringify(S).replace(/</g,'\\u003c');
@@ -1627,7 +1581,6 @@ edBody.addEventListener('click',e=>{
 });
 
 /* ====================== KHỞI ĐỘNG ====================== */
-try{if('speechSynthesis' in window){speechSynthesis.getVoices();speechSynthesis.addEventListener('voiceschanged',()=>{if(!$('#editor').hidden&&ed.tab==='museum')renderEd()})}}catch(e){}
 applyMeta();applySettingsLanguage();setTourUI();
 if(DRIVE_LOAD_ERROR)toast(`Không tải được dữ liệu Drive: ${DRIVE_LOAD_ERROR.message}. Đang dùng dữ liệu cục bộ nếu có.`);
 else if(DATA_LOAD_ERROR)toast(`Không tải được museum-data.json: ${DATA_LOAD_ERROR.message}. Hãy kiểm tra tệp dữ liệu.`);
@@ -1640,6 +1593,11 @@ const WALK_TYPES={
   documents:{label:'Phòng tư liệu',icon:'📜',center:[0,14],color:0x39271a}
 };
 const W={active:false,ready:false,loopRunning:false,renderer:null,scene:null,camera:null,root:null,targets:[],solids:[],rooms:[],keys:{},joystick:{x:0,y:0},velocity:{x:0,z:0},yaw:0,pitch:0,last:0,ray:null,centerRay:null,current:null,activeCampaign:'xiem',promptAt:0,promptText:'',statusText:'',screenCanvas:null,screenTexture:null,screenLast:0,tvScreens:[],tvVideoElements:{},tvVideoTextures:{},pendingGalleryImages:[],galleryImagesLoading:false,pendingArtifactImages:[],artifactImagesLoaded:false,pendingModels:[],modelLoadsStarted:new Set(),ships:[],battleFleet:[],battleArmy:[],battleShots:[],battleEffects:[],battleMuzzles:[],battleGroup:null,battleCampaignGroups:{},battleOriginalFov:null,battleElapsed:0,battlePaused:false,battleRunning:false,battleSiegeTriggered:false,battleStart:0,battlePhase:-1,wasLocked:false};
+function setWalkMenuOpen(open){
+  const menu=$('#walkMenu'),button=$('#walkMenuToggle');
+  menu.hidden=!open;button.setAttribute('aria-expanded',String(open));
+  button.setAttribute('aria-label',open?'Đóng menu chức năng':'Mở menu chức năng');
+}
 function walkUpdateJoystick(event){
   const rect=$('#walkJoystick').getBoundingClientRect();
   const maximum=Math.min(rect.width,rect.height)*.25,centerX=rect.left+rect.width/2,centerY=rect.top+rect.height/2;
@@ -1671,8 +1629,11 @@ function walkMakeUI(){
   root.innerHTML=`
     <canvas id="walkCanvas" aria-label="Không gian bảo tàng ba chiều"></canvas>
     <div class="walk-top"><div class="walk-brand">🏛 ${esc(S.meta.war)}</div>
-      <div class="walk-rooms"><button data-wroom="gallery">🖼 Phòng ảnh</button><button data-wroom="artifacts">🏺 Hiện vật</button><button data-wroom="battle">🗺 Sa hình</button><button data-wroom="documents">📜 Tư liệu</button></div>
-      <div class="walk-tools"><button id="walkHome">← Sảnh chính</button><button id="walkIntroBtn">Hướng dẫn</button><button id="walkSettingsBtn">⚙ Cài đặt</button></div>
+      <button class="menu-toggle" id="walkMenuToggle" type="button" aria-label="Mở menu chức năng" aria-expanded="false" aria-controls="walkMenu"><span></span><span></span><span></span></button>
+      <div class="walk-menu" id="walkMenu" hidden>
+        <div class="walk-rooms"><button data-wroom="gallery">🖼 Phòng ảnh</button><button data-wroom="artifacts">🏺 Hiện vật</button><button data-wroom="battle">🗺 Sa hình</button><button data-wroom="documents">📜 Tư liệu</button></div>
+        <div class="walk-tools"><button id="walkHome">← Sảnh chính</button><button id="walkIntroBtn">Hướng dẫn</button><button id="walkSettingsBtn">⚙ Cài đặt</button></div>
+      </div>
     </div>
     <div class="walk-cross" aria-hidden="true">+</div>
     <div id="walkPrompt" class="walk-prompt">Nhấn “Bắt đầu tham quan”, sau đó nhấp vào cảnh 3D để điều khiển góc nhìn.</div>
@@ -1698,6 +1659,14 @@ function walkMakeUI(){
   const topbtn=document.createElement('button');topbtn.id='top3D';topbtn.className='btn';topbtn.textContent='🚶 Không gian 3D';
   const topTour=$('#tourIdle');if(topTour)topTour.appendChild(topbtn);
   btn.onclick=walkOpen;topbtn.onclick=walkOpen;
+  $('#walkMenuToggle').onclick=()=>setWalkMenuOpen($('#walkMenu').hidden);
+  $('#walkMenu').addEventListener('click',event=>{
+    if(event.target.closest('button'))setWalkMenuOpen(false);
+  });
+  document.addEventListener('click',event=>{
+    if(!$('#walkMenu').hidden&&!$('.walk-top').contains(event.target))setWalkMenuOpen(false);
+  });
+  $('#walkMenuToggle').setAttribute('aria-expanded','false');
   $('#walkHome').onclick=walkLeave;$('#walkBack').onclick=walkLeave;
   $('#walkIntroBtn').onclick=()=>{$('#walkIntro').hidden=false;if(document.pointerLockElement=== $('#walkCanvas'))document.exitPointerLock?.()};
   $('#walkSettingsBtn').onclick=openSettings;
@@ -1753,7 +1722,6 @@ function walkMakeUI(){
   });
   $('#walkCanvas').addEventListener('pointerup',()=>{W.touchX=null;W.touchY=null});
   $('#walkDetailContent').addEventListener('click',e=>{
-    if(e.target.closest('#walkSpeak'))walkSpeak(W.current);
     if(e.target.closest('#walkReplay'))walkPlayBattle();
   });
   document.addEventListener('pointerlockchange',()=>{
@@ -2995,7 +2963,7 @@ function walkOpenItem(it){
   const resourcePanel=it.isResourceCabinet?`<section class="walk-resource-list"><p>Chọn tài liệu bên dưới để tải về thiết bị.</p>${(S.resources||[]).length?(S.resources||[]).map((f,i)=>`<div class="resource-file"><span class="resource-file-type">📄</span><span class="resource-file-name">${esc(f.name)}<small>${esc(f.path||f.name)}</small></span><button class="primary" type="button" data-walk-resource-download="${i}">⬇ Tải xuống</button></div>`).join(''):'<p class="resource-empty">Hiện chưa có tài liệu. Ban quản lý có thể thêm đường dẫn trong mục “Quản lý bảo tàng” → “Tải tài liệu”.</p>'}</section>`:'';
   const videos=it.isVideoScreen?(S.videos||[]).filter(v=>v.campaign===(it.campaign||'xiem')):[];
   const videoPanel=it.isVideoScreen?`<section class="walk-video-list"><p>Video cho chiến dịch này:</p>${videos.length?videos.map(v=>`<div class="resource-file"><span class="resource-file-type">🎬</span><span class="resource-file-name">${esc(v.name)}<small>${esc(v.path||v.name)}</small></span><button class="primary" type="button" data-play-video="${esc(v.id)}">▶ Phát video</button></div>`).join(''):'<p class="resource-empty">Chưa có video bổ sung. Có thể thêm đường dẫn tại Quản lý bảo tàng → Tải tài liệu.</p>'}<div id="walkVideoPlayer"></div></section>`:'';
-  $('#walkDetailContent').innerHTML=`<span class="badge">${it.isVideoScreen?'📺':type.icon} ${esc(it.isVideoScreen?'TV sa hình':type.label)}</span><h2>${esc(it.title)}</h2><p class="meta">${esc([it.date,it.origin].filter(Boolean).join(' · '))}</p>${image}<div class="body">${paragraphs|| (it.isResourceCabinet||it.isVideoScreen?'': '<p>Chưa có nội dung mô tả cho hiện vật này.</p>')}</div>${resourcePanel}${videoPanel}${it.question?`<div class="question"><b>Câu hỏi suy ngẫm</b><p>${esc(it.question)}</p></div>`:''}<div class="actions">${it.isResourceCabinet||it.isVideoScreen?'': '<button class="primary" id="walkSpeak">🔊 Nghe thuyết minh</button>'}${['sahinh','phim'].includes(it.type)?'<button class="primary" id="walkReplay">▶ Tái hiện trận đánh</button>':''}${it.isResourceCabinet||it.isVideoScreen?'':'<button class="primary" id="walkEditItem">✎ Chỉnh sửa hiện vật</button>'}<button id="walkDetailClose2">Đóng thông tin</button></div>`;
+  $('#walkDetailContent').innerHTML=`<span class="badge">${it.isVideoScreen?'📺':type.icon} ${esc(it.isVideoScreen?'TV sa hình':type.label)}</span><h2>${esc(it.title)}</h2><p class="meta">${esc([it.date,it.origin].filter(Boolean).join(' · '))}</p>${image}<div class="body">${paragraphs|| (it.isResourceCabinet||it.isVideoScreen?'': '<p>Chưa có nội dung mô tả cho hiện vật này.</p>')}</div>${resourcePanel}${videoPanel}${it.question?`<div class="question"><b>Câu hỏi suy ngẫm</b><p>${esc(it.question)}</p></div>`:''}<div class="actions">${['sahinh','phim'].includes(it.type)?'<button class="primary" id="walkReplay">▶ Tái hiện trận đánh</button>':''}${it.isResourceCabinet||it.isVideoScreen?'':'<button class="primary" id="walkEditItem">✎ Chỉnh sửa hiện vật</button>'}<button id="walkDetailClose2">Đóng thông tin</button></div>`;
   const detailImage=$('#walkDetailContent .mini-art img');
   if(detailImage){
     detailImage.loading='eager';
@@ -3014,11 +2982,6 @@ function walkOpenItem(it){
   $('#walkDetailContent').querySelectorAll('[data-walk-resource-download]').forEach(btn=>btn.addEventListener('click',()=>downloadSavedResource((S.resources||[])[Number(btn.dataset.walkResourceDownload)])));
   $('#walkDetailContent').querySelectorAll('[data-play-video]').forEach(btn=>btn.addEventListener('click',()=>{const v=(S.videos||[]).find(x=>x.id===btn.dataset.playVideo);if(!v)return;const src=v.path?assetHref(v.path):(v.url||v.dataURL);if(!src){toast('Video này chưa có đường dẫn tệp.');return}const host=$('#walkVideoPlayer');host.innerHTML=`<video controls autoplay playsinline style="width:100%;max-height:42vh;background:#000;border-radius:10px" src="${esc(src)}"></video>`;const video=host.querySelector('video');video.volume=USER_PREFS.volume;const texture=new THREE.VideoTexture(video);texture.colorSpace=THREE.SRGBColorSpace;(W.tvScreens||[]).filter(screen=>screen.campaign===v.campaign).forEach(screen=>{screen.mesh.material.map=texture;screen.mesh.material.needsUpdate=true;});video.play().catch(error=>toast(`Không phát được video: ${error.message}`));}));
   if(document.pointerLockElement===$('#walkCanvas'))document.exitPointerLock?.();
-}
-function walkSpeak(it){
-  if(!it)return;const txt=it.script||it.detail||it.text||it.title;
-  if(!('speechSynthesis'in window)){toast('Trình duyệt không hỗ trợ đọc thuyết minh tự động.');return}
-  try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(txt);u.lang='vi-VN';u.rate=Number(S.settings.rate)||1;u.volume=USER_PREFS.volume;const v=typeof pickVoice==='function'?pickVoice():null;if(v){u.voice=v;u.lang=v.lang||'vi-VN'}speechSynthesis.speak(u);}catch(e){toast('Không thể phát giọng đọc trên trình duyệt này.');}
 }
 function walkBattleSetPhase(phase){
   phase=Math.max(0,Math.min(5,phase));W.battlePhase=phase;

@@ -8,9 +8,6 @@
   },
   "settings": {
     "transition": "curtain",
-    "voice": true,
-    "rate": 1,
-    "voiceName": "",
     "tourMinutes": 4
   },
   "campaignVersion": 1,
