@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Bảo tàng ảo Tây Sơn</title>
+<title>Bảo Tàng Tây Sơn</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,700&subset=vietnamese&display=swap" rel="stylesheet">
@@ -14,6 +14,18 @@
 </head>
 <body data-view="entry">
 <script id="seed" type="application/json">null</script>
+
+<div id="preloadScreen" class="preload-screen" role="dialog" aria-modal="true" aria-labelledby="preloadTitle" aria-describedby="preloadMessage">
+  <div class="preload-card">
+    <p class="preload-eyebrow">BẢO TÀNG ẢO</p>
+    <h1 id="preloadTitle">Đang chuẩn bị bảo tàng</h1>
+    <p id="preloadMessage" aria-live="polite">Đang khởi tạo tài nguyên cho phiên tham quan này…</p>
+    <div class="preload-progress"><span id="preloadProgressBar"></span></div>
+    <div class="preload-status"><span id="preloadStatus">Đang chuẩn bị…</span><span id="preloadPercent">0%</span></div>
+    <p id="preloadError" class="preload-error" hidden></p>
+    <button id="preloadRetry" class="btn primary" type="button" hidden>Thử tải lại</button>
+  </div>
+</div>
 
 <div id="app">
   <!-- Thanh điều khiển -->

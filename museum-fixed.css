@@ -13,6 +13,16 @@ body{background:var(--ink);color:var(--cream);font-family:var(--sans);font-size:
 button{font:inherit;color:inherit;cursor:pointer}
 :focus-visible{outline:2px solid var(--brass-2);outline-offset:3px}
 #app{position:fixed;inset:0}
+.preload-screen{position:fixed;inset:0;z-index:1000;display:grid;place-items:center;padding:24px;background:radial-gradient(ellipse at 50% 30%,#492022 0,#1c1010 58%,#0d0807 100%)}
+.preload-card{width:min(520px,100%);padding:clamp(24px,6vw,48px);border:1px solid rgba(230,196,122,.45);border-radius:18px;background:rgba(15,10,9,.82);box-shadow:0 24px 80px #0009;text-align:center}
+.preload-eyebrow{margin-bottom:8px;color:var(--brass-2);font-size:.78rem;font-weight:700;letter-spacing:.18em}
+.preload-card h1{margin:0 0 10px;color:var(--cream);font-family:var(--serif);font-size:clamp(1.55rem,5vw,2.15rem);line-height:1.25}
+.preload-card>p:not(.preload-eyebrow){color:var(--muted);font-size:.9rem;overflow-wrap:anywhere}
+.preload-progress{height:10px;margin:24px 0 10px;overflow:hidden;border:1px solid rgba(230,196,122,.3);border-radius:99px;background:#090706}
+.preload-progress span{display:block;width:0;height:100%;border-radius:inherit;background:linear-gradient(90deg,#a9782c,#f0d58a);transition:width .18s ease}
+.preload-status{display:flex;justify-content:space-between;gap:12px;color:var(--brass-2);font-size:.82rem}
+.preload-error{max-height:22vh;margin-top:16px;padding:10px;border:1px solid rgba(255,145,120,.5);border-radius:8px;background:rgba(120,35,25,.25);color:#ffe0d8!important;font-size:.78rem!important;overflow:auto}
+.preload-card #preloadRetry{margin-top:18px}
 .view{position:absolute;inset:0;overflow-x:hidden;overflow-y:auto;display:none}
 .view.active{display:block}
 

@@ -109,12 +109,121 @@ function projectAssetPath(value,folder){
   if(!path.startsWith(`${folder}/`))path=`${folder}/${path}`;
   return path;
 }
-function assetHref(path){
-  const driveMatch=String(path||'').match(/^drive:([A-Za-z0-9_-]+)$/);
+const SESSION_ASSET_URLS=new Map(),SESSION_OBJECT_URLS=new Set();
+function assetSource(path){
+  const value=String(path||'');
+  const driveMatch=value.match(/^drive:([A-Za-z0-9_-]+)$/);
   if(driveMatch&&DRIVE_CONFIG.apiKey)return `https://www.googleapis.com/drive/v3/files/${encodeURIComponent(driveMatch[1])}?alt=media&key=${encodeURIComponent(DRIVE_CONFIG.apiKey)}`;
-  if(/^data:/i.test(String(path||'')))return path;
-  return String(path||'').split('/').map(encodeURIComponent).join('/');
+  if(/^(?:data:|blob:|https?:)/i.test(value))return value;
+  return value.split('/').map(encodeURIComponent).join('/');
 }
+function assetHref(path){
+  const source=assetSource(path);
+  if(/^(?:data:|blob:)/i.test(source))return source;
+  return SESSION_ASSET_URLS.get(new URL(source,location.href).href)||source;
+}
+function museumPreloadAssets(){
+  const candidates=new Set(['RGXM.mp4','NH-DD.mp4','phong-hien-vat-tay-son.png','phao.glb','sung.glb','tuong3d.glb']);
+  const records=[...(S.items||[]),...THEMES.flatMap(theme=>theme.data?.items||[])];
+  records.forEach(record=>{
+    ['img','path','url','src','poster','texture','model'].forEach(key=>{
+      const value=record?.[key];
+      if(typeof value==='string'&&value.trim())candidates.add(value.trim());
+    });
+  });
+  [...(S.resources||[]),...(S.videos||[])].forEach(resource=>{
+    ['path','url','src'].forEach(key=>{
+      const value=resource?.[key];
+      if(typeof value==='string'&&value.trim())candidates.add(value.trim());
+    });
+  });
+  return [...candidates].filter(value=>!/^data:/i.test(value)).map(value=>{
+    const source=assetSource(value);
+    return {url:new URL(source,location.href).href};
+  }).filter((asset,index,assets)=>assets.findIndex(candidate=>candidate.url===asset.url)===index);
+}
+function updatePreloadProgress(completed,total,current,currentBytes=0,currentSize=0){
+  const portion=currentSize>0?Math.min(1,currentBytes/currentSize):0;
+  const percent=Math.min(99,Math.floor(((completed+portion)/Math.max(total,1))*100));
+  $('#preloadProgressBar').style.width=`${percent}%`;
+  $('#preloadPercent').textContent=`${percent}%`;
+  $('#preloadStatus').textContent=current?`Đang tải ${current}`:`Đã tải ${completed}/${total} tài nguyên`;
+}
+function preloadName(url){
+  try{return decodeURIComponent(new URL(url).pathname.split('/').pop()||url)}catch{return url}
+}
+async function preloadAsset(asset,onProgress){
+  if(SESSION_ASSET_URLS.has(asset.url))return;
+  const response=await fetch(asset.url,{cache:'no-store'});
+  if(!response.ok)throw new Error(`HTTP ${response.status}`);
+  const size=Number(response.headers.get('content-length'))||0;
+  if(!response.body){
+    const blob=await response.blob();
+    const objectUrl=URL.createObjectURL(blob);
+    SESSION_ASSET_URLS.set(asset.url,objectUrl);SESSION_OBJECT_URLS.add(objectUrl);
+    onProgress(blob.size,blob.size);
+    return;
+  }
+  const reader=response.body.getReader(),chunks=[];
+  let loaded=0;
+  while(true){
+    const {done,value}=await reader.read();
+    if(done)break;
+    chunks.push(value);loaded+=value.byteLength;onProgress(loaded,size);
+  }
+  const blob=new Blob(chunks,{type:response.headers.get('content-type')||''});
+  const objectUrl=URL.createObjectURL(blob);
+  SESSION_ASSET_URLS.set(asset.url,objectUrl);SESSION_OBJECT_URLS.add(objectUrl);
+}
+async function runMuseumPreload(){
+  const screen=$('#preloadScreen'),retry=$('#preloadRetry'),errorBox=$('#preloadError'),message=$('#preloadMessage');
+  retry.hidden=true;errorBox.hidden=true;errorBox.textContent='';
+  message.textContent='Tài nguyên chỉ được giữ tạm trong bộ nhớ của phiên trình duyệt này.';
+  const assets=museumPreloadAssets(),libraryTask=1,total=assets.length+libraryTask;
+  let completed=0;
+  const failures=[];
+  assets.forEach(asset=>{if(SESSION_ASSET_URLS.has(asset.url))completed++});
+  updatePreloadProgress(completed,total);
+  for(const asset of assets){
+    if(SESSION_ASSET_URLS.has(asset.url))continue;
+    const name=preloadName(asset.url);
+    try{
+      await preloadAsset(asset,(bytes,size)=>updatePreloadProgress(completed,total,name,bytes,size));
+      completed++;updatePreloadProgress(completed,total);
+    }catch(error){
+      console.error(`Không thể tải tài nguyên bảo tàng "${name}".`,error);
+      failures.push(`${name}: ${error.message}`);
+      completed++;updatePreloadProgress(completed,total);
+    }
+  }
+  try{
+    $('#preloadStatus').textContent='Đang tải thư viện tham quan 3D…';
+    await Promise.all([ensureWalkLibraries(),ensureWalkMeshoptDecoder(),document.fonts.ready]);
+    completed++;updatePreloadProgress(completed,total);
+  }catch(error){
+    console.error('Không thể tải thư viện cần thiết cho bảo tàng.',error);
+    failures.push(`Thư viện tham quan 3D: ${error.message}`);
+    completed++;updatePreloadProgress(completed,total);
+  }
+  if(failures.length){
+    $('#preloadProgressBar').style.width=`${Math.floor((completed/total)*100)}%`;
+    $('#preloadPercent').textContent=`${Math.floor((completed/total)*100)}%`;
+    $('#preloadStatus').textContent=`Tải lỗi ${failures.length} tài nguyên`;
+    message.textContent='Chưa thể vào bảo tàng vì một số tài nguyên chưa tải được.';
+    errorBox.textContent=failures.join(' · ');
+    errorBox.hidden=false;retry.hidden=false;
+    return;
+  }
+  $('#preloadProgressBar').style.width='100%';$('#preloadPercent').textContent='100%';
+  $('#preloadStatus').textContent=`Đã tải xong ${assets.length} tài nguyên`;
+  message.textContent='Đang mở bảo tàng…';
+  screen.hidden=true;
+}
+window.addEventListener('pagehide',event=>{
+  if(event.persisted)return;
+  SESSION_OBJECT_URLS.forEach(url=>URL.revokeObjectURL(url));
+  SESSION_OBJECT_URLS.clear();SESSION_ASSET_URLS.clear();
+},{once:true});
 
 const TYPES={
   tranh:{label:'Tranh',wing:'Phòng tranh',icon:'🖼'},
@@ -369,7 +478,7 @@ ART['chien-luoc']=()=>{
    ===================================================================== */
 const DEFAULT_DBP={
 meta:{
-  title:'Bảo tàng ảo',
+  title:'',
   war:'Chiến dịch Điện Biên Phủ 1954',
   subtitle:'Bước vào các phòng trưng bày để tìm hiểu chiến dịch qua tranh, sa hình, đạo cụ, ảnh và tư liệu.',
   welcome:`Chào mừng các em đến với bảo tàng ảo về chiến dịch Điện Biên Phủ năm 1954.
@@ -469,7 +578,7 @@ Vĩ tuyến 17 được dùng làm giới tuyến quân sự tạm thời, chờ
    ===================================================================== */
 const XIEM={
 meta:{
-  title:'Bảo tàng ảo',
+  title:'',
   war:'Kháng chiến chống quân Xiêm (1784 – 1785)',
   subtitle:'Nguyễn Huệ, người sau này là vua Quang Trung, và trận Rạch Gầm – Xoài Mút: vì sao quân ít hơn lại đánh thắng quân đông.',
   welcome:`Chào mừng các em đến với bảo tàng ảo về cuộc kháng chiến chống quân Xiêm xâm lược của Nguyễn Huệ, người sau này là vua Quang Trung.
@@ -569,7 +678,7 @@ Chiêu Tăng, Chiêu Sương cùng một số tàn quân chạy qua Chân Lạp 
 ]};
 
 const THANH={
-meta:{title:'Bảo tàng ảo',war:'Kháng chiến chống quân Thanh (1788 – 1789)',subtitle:'Nguyễn Huệ lên ngôi Hoàng đế, lấy niên hiệu Quang Trung, rồi chỉ huy chiến dịch giải phóng Thăng Long.',welcome:'Cùng tìm hiểu chiến dịch chống quân Thanh và chiến thắng Ngọc Hồi – Đống Đa dưới sự chỉ huy của Hoàng đế Quang Trung.',outro:'Hãy cùng thảo luận: địa hình, thời cơ và cách tổ chức tiến công đã góp phần làm nên chiến thắng như thế nào?'},
+meta:{title:'',war:'Kháng chiến chống quân Thanh (1788 – 1789)',subtitle:'Nguyễn Huệ lên ngôi Hoàng đế, lấy niên hiệu Quang Trung, rồi chỉ huy chiến dịch giải phóng Thăng Long.',welcome:'Cùng tìm hiểu chiến dịch chống quân Thanh và chiến thắng Ngọc Hồi – Đống Đa dưới sự chỉ huy của Hoàng đế Quang Trung.',outro:'Hãy cùng thảo luận: địa hình, thời cơ và cách tổ chức tiến công đã góp phần làm nên chiến thắng như thế nào?'},
 settings:{transition:'curtain',tourMinutes:4},
 items:[
 {id:'thanh-hanh-quan',campaign:'thanh',type:'dohoa',title:'Hành quân thần tốc ra Bắc',date:'Cuối năm 1788 – đầu năm 1789',origin:'Sơ đồ khái quát, không theo tỉ lệ',detail:'Quang Trung lên ngôi Hoàng đế tại Phú Xuân, rồi tổ chức hành quân ra Bắc. Đạo quân tiến qua Tam Điệp và chia hướng đánh vào các đồn lũy bảo vệ Thăng Long.',text:'Phú Xuân → Tam Điệp → Thăng Long. Các mũi tiến công được phối hợp để đánh vào hệ thống phòng thủ của quân Thanh trong dịp Tết Kỷ Dậu.',script:'Quang Trung lên ngôi Hoàng đế ở Phú Xuân rồi tiến quân ra Bắc. Từ Tam Điệp, quân Tây Sơn chia hướng, phối hợp tiến công các đồn lũy của quân Thanh.',question:'Việc chọn thời điểm Tết có ý nghĩa gì đối với yếu tố bất ngờ?',img:'',art:'',phases:'',hotspots:'',inTour:true},
@@ -583,7 +692,7 @@ items:[
 const XIEM_IDS=new Set(XIEM.items.map(item=>item.id));
 const CAMPAIGN_VERSION=1;
 const DEFAULT={
-meta:Object.assign({},XIEM.meta,{war:'Kháng chiến chống quân Xiêm và quân Thanh',subtitle:'Hai chiến thắng của Nguyễn Huệ – Quang Trung: Rạch Gầm – Xoài Mút và Ngọc Hồi – Đống Đa.',welcome:'Khám phá hai chiến dịch chống ngoại xâm của Nguyễn Huệ – Quang Trung: kháng chiến chống quân Xiêm và chiến thắng quân Thanh.',outro:'Hãy so sánh cách Nguyễn Huệ – Quang Trung lựa chọn địa hình, thời cơ và cách phối hợp lực lượng trong hai chiến dịch.'}),
+meta:Object.assign({},XIEM.meta,{title:'',war:'Bảo Tàng Tây Sơn',subtitle:'Kháng chiến chống quân Xiêm và quân Thanh',welcome:'Khám phá hai chiến dịch chống ngoại xâm của Nguyễn Huệ – Quang Trung: kháng chiến chống quân Xiêm và chiến thắng quân Thanh.',outro:'Hãy so sánh cách Nguyễn Huệ – Quang Trung lựa chọn địa hình, thời cơ và cách phối hợp lực lượng trong hai chiến dịch.'}),
 settings:clone(XIEM.settings),campaignVersion:CAMPAIGN_VERSION,
 items:[...XIEM.items.map(item=>Object.assign({},item,{campaign:'xiem'})),...THANH.items]
 };
@@ -622,6 +731,11 @@ function load(){
     const existing=new Set(d.items.map(item=>item.id));
     d.items.push(...THANH.items.filter(item=>!existing.has(item.id)));
     d.meta=Object.assign({},d.meta,{war:DEFAULT.meta.war,subtitle:DEFAULT.meta.subtitle,welcome:DEFAULT.meta.welcome,outro:DEFAULT.meta.outro});
+  }
+  if(d.meta.title==='Bảo tàng ảo'&&['Bảo Tàng Tây Sơn','Kháng chiến Tây Sơn','Kháng chiến chống quân Xiêm và quân Thanh'].includes(d.meta.war)){
+    d.meta.title='';
+    d.meta.war='Bảo Tàng Tây Sơn';
+    d.meta.subtitle='Kháng chiến chống quân Xiêm và quân Thanh';
   }
   d.campaignVersion=CAMPAIGN_VERSION;
   return norm(d);
@@ -845,10 +959,11 @@ function parseHot(s){
 }
 function applyMeta(){
   const m=S.meta;
-  document.title=`${m.title} - ${m.war}`;
+  document.title=m.title?`${m.title} - ${m.war}`:m.war;
   $('#brandTxt').textContent=m.title;
   $('#entryEye').textContent=m.title;$('#entryTitle').textContent=m.war;$('#entrySub').textContent=m.subtitle;
   $('#hallEye').textContent=m.title;$('#hallWar').textContent=m.war;$('#hallSub').textContent=m.subtitle;
+  $('#entryEye').hidden=!m.title;$('#hallEye').hidden=!m.title;
   $('#fxSel').value=S.settings.transition;
 }
 function setTopMenuOpen(open){
@@ -2301,7 +2416,7 @@ function walkLoadGLB(path,target,height,color,metalness,roughness,fallback,optio
   ensureWalkMeshoptDecoder().then(decoder=>{
     const loader=new THREE.GLTFLoader();
     loader.setMeshoptDecoder(decoder);
-    loader.load(new URL(path,location.href).href,gltf=>{
+    loader.load(assetHref(path),gltf=>{
       const model=gltf.scene,fitAxis=options.fitAxis||'y';
       model.rotation.x=options.rotationX||0;
       const sourceBox=new THREE.Box3().setFromObject(model),size=sourceBox.getSize(new THREE.Vector3()),axisSize=size[fitAxis];
@@ -2394,7 +2509,7 @@ function walkBuildTaySonDisplays(){
     const refImg=new Image();
     refImg.onload=()=>{const tex=new THREE.Texture(refImg);tex.colorSpace=THREE.SRGBColorSpace;tex.needsUpdate=true;canvas.material.map=tex;canvas.material.color.set(0xffffff);canvas.material.needsUpdate=true;};
     refImg.onerror=()=>console.error('Không tải được ảnh phòng hiện vật: phong-hien-vat-tay-son.png.');
-    refImg.src='phong-hien-vat-tay-son.png';
+    refImg.src=assetHref('phong-hien-vat-tay-son.png');
   });
   // Warm spotlights and subtle brass posts evoke the museum reference.
   [[10.55,-4.25],[14,-4.25],[17.35,-4.25],[17.1,3.55]].forEach(([x,z])=>walkPointLight(x,4.7,z,0xffd39a,1.0,5.5));
@@ -2730,7 +2845,7 @@ function walkTVTexture(campaign,index){
   if(W.tvVideoElements[campaign])return W.tvPreviewTextures[campaign]||W.tvVideoTextures[campaign];
   const video=document.createElement('video');
   const file=campaign==='xiem'?'RGXM.mp4':'NH-DD.mp4';
-  video.src=new URL(file,location.href).href;
+  video.src=assetHref(file);
   video.muted=true;video.defaultMuted=true;video.volume=1;video.loop=true;video.playsInline=true;video.preload='auto';
   video.setAttribute('muted','');video.setAttribute('playsinline','');video.setAttribute('webkit-playsinline','');
   video.style.position='fixed';video.style.width='1px';video.style.height='1px';video.style.opacity='0';video.style.pointerEvents='none';video.style.left='-10px';video.style.top='-10px';
@@ -2980,7 +3095,7 @@ function walkOpenItem(it){
   const editButton=$('#walkEditItem');
   if(editButton)editButton.onclick=()=>openEditor(it.id);
   $('#walkDetailContent').querySelectorAll('[data-walk-resource-download]').forEach(btn=>btn.addEventListener('click',()=>downloadSavedResource((S.resources||[])[Number(btn.dataset.walkResourceDownload)])));
-  $('#walkDetailContent').querySelectorAll('[data-play-video]').forEach(btn=>btn.addEventListener('click',()=>{const v=(S.videos||[]).find(x=>x.id===btn.dataset.playVideo);if(!v)return;const src=v.path?assetHref(v.path):(v.url||v.dataURL);if(!src){toast('Video này chưa có đường dẫn tệp.');return}const host=$('#walkVideoPlayer');host.innerHTML=`<video controls autoplay playsinline style="width:100%;max-height:42vh;background:#000;border-radius:10px" src="${esc(src)}"></video>`;const video=host.querySelector('video');video.volume=USER_PREFS.volume;const texture=new THREE.VideoTexture(video);texture.colorSpace=THREE.SRGBColorSpace;(W.tvScreens||[]).filter(screen=>screen.campaign===v.campaign).forEach(screen=>{screen.mesh.material.map=texture;screen.mesh.material.needsUpdate=true;});video.play().catch(error=>toast(`Không phát được video: ${error.message}`));}));
+  $('#walkDetailContent').querySelectorAll('[data-play-video]').forEach(btn=>btn.addEventListener('click',()=>{const v=(S.videos||[]).find(x=>x.id===btn.dataset.playVideo);if(!v)return;const src=assetHref(v.path||v.url||v.dataURL);if(!src){toast('Video này chưa có đường dẫn tệp.');return}const host=$('#walkVideoPlayer');host.innerHTML=`<video controls autoplay playsinline style="width:100%;max-height:42vh;background:#000;border-radius:10px" src="${esc(src)}"></video>`;const video=host.querySelector('video');video.volume=USER_PREFS.volume;const texture=new THREE.VideoTexture(video);texture.colorSpace=THREE.SRGBColorSpace;(W.tvScreens||[]).filter(screen=>screen.campaign===v.campaign).forEach(screen=>{screen.mesh.material.map=texture;screen.mesh.material.needsUpdate=true;});video.play().catch(error=>toast(`Không phát được video: ${error.message}`));}));
   if(document.pointerLockElement===$('#walkCanvas'))document.exitPointerLock?.();
 }
 function walkBattleSetPhase(phase){
@@ -3052,5 +3167,7 @@ function walkLoop(now){
 }
 walkMakeUI();
 applySettingsLanguage();
+$('#preloadRetry').addEventListener('click',runMuseumPreload);
+runMuseumPreload();
 
 })();
