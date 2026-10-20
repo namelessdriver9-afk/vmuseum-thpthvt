@@ -1860,6 +1860,7 @@ function walkFloor(w,d,x,z,kind){const mat=new THREE.MeshStandardMaterial({map:w
 function walkWallH(z,x1,x2,mat,depth=.28,height=6.6){const w=x2-x1;if(w<=0)return;walkBox(w,height,depth,mat,(x1+x2)/2,height/2,z,{solid:true});}
 function walkWallV(x,z1,z2,mat,depth=.28,height=6.6){const d=z2-z1;if(d<=0)return;walkBox(depth,height,d,mat,x,height/2,(z1+z2)/2,{solid:true});}
 function walkPointLight(x,y,z,color=0xffc677,intensity=2.2,dist=9){const p=new THREE.PointLight(color,intensity,dist,2);p.position.set(x,y,z);p.castShadow=false;W.scene.add(p);return p;}
+function walkGalleryLabelText(text){return String(text||'').split('\n').map(line=>line.replace(/^(\s*)(\S)/,(_,space,letter)=>space+letter.toUpperCase())).join('\n')}
 function walkLabelTexture(title,sub,bg='#321716'){
   const c=document.createElement('canvas');c.width=1024;c.height=256;const g=c.getContext('2d');g.fillStyle=bg;g.fillRect(0,0,1024,256);g.strokeStyle='#d7b56b';g.lineWidth=8;g.strokeRect(12,12,1000,232);g.strokeStyle='#735127';g.lineWidth=2;g.strokeRect(28,28,968,200);g.textAlign='center';g.fillStyle='#f2d890';g.font='bold 48px "Be Vietnam Pro", Arial, sans-serif';g.fillText(title,512,112,930);g.fillStyle='#e5d2ad';g.font='28px "Be Vietnam Pro", Arial, sans-serif';g.fillText(sub||'BẢO TÀNG TƯƠNG TÁC',512,170,940);const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;return t;
 }
@@ -1982,9 +1983,24 @@ function walkTextureForItem(it,deferImage=false){
   if(it.img){
     const load=done=>{
       const img=new Image();
-      img.onload=()=>{drawImageFit(img);done()};
-      img.onerror=()=>{console.error(`Không tải được ảnh "${it.img}" của hiện vật "${it.title}".`);drawMissingImage();done()};
-      img.src=assetHref(it.img);
+      let objectUrl='';
+      const fail=error=>{
+        console.error(`Không tải được ảnh "${it.img}" của hiện vật "${it.title}".`,error);
+        if(objectUrl)URL.revokeObjectURL(objectUrl);
+        drawMissingImage();done();
+      };
+      img.onload=()=>{drawImageFit(img);if(objectUrl)URL.revokeObjectURL(objectUrl);done()};
+      img.onerror=()=>fail(new Error('Trình duyệt không đọc được tệp ảnh.'));
+      const src=assetHref(it.img);
+      if(/^drive:/i.test(it.img)){
+        fetch(src,{cache:'no-store'}).then(response=>{
+          if(!response.ok)throw new Error(`Tải ảnh từ Google Drive thất bại (HTTP ${response.status}).`);
+          return response.blob();
+        }).then(blob=>{objectUrl=URL.createObjectURL(blob);img.src=objectUrl}).catch(fail);
+      }else{
+        if(new URL(src,location.href).origin!==location.origin)img.crossOrigin='anonymous';
+        img.src=src;
+      }
     };
     if(deferImage)W.pendingGalleryImages.push(load);else load(()=>{});
   }else if(it.art&&ART[it.art]){
@@ -2019,7 +2035,7 @@ function walkCreatePicture(it,pos,yaw,w=2.5,h=1.85){
   walkBox(.13,h+.35,.15,gold,-w/2-.045,0,0,{parent:root});walkBox(.13,h+.35,.15,gold,w/2+.045,0,0,{parent:root});
   walkBox(w+.05,h+.13,.05,dark,0,0,-.045,{parent:root});
   const mat=new THREE.MeshBasicMaterial({map:walkTextureForItem(it,true),side:THREE.DoubleSide});const plane=new THREE.Mesh(new THREE.PlaneGeometry(w,h),mat);plane.position.z=.035;plane.castShadow=false;plane.userData.galleryArtwork=true;root.add(plane);
-  const label=new THREE.Mesh(new THREE.PlaneGeometry(w+.15,.42),new THREE.MeshBasicMaterial({map:walkLabelTexture(it.title,it.date||'TƯ LIỆU TRƯNG BÀY','#362018'),side:THREE.DoubleSide}));label.position.set(0,-h/2-.44,.04);label.userData.galleryLabel=true;root.add(label);
+  const label=new THREE.Mesh(new THREE.PlaneGeometry(w+.15,.42),new THREE.MeshBasicMaterial({map:walkLabelTexture(walkGalleryLabelText(it.title),walkGalleryLabelText(it.date||'TƯ LIỆU TRƯNG BÀY'),'#362018'),side:THREE.DoubleSide}));label.position.set(0,-h/2-.44,.04);label.userData.galleryLabel=true;root.add(label);
   W.scene.add(root);W.targets.push(root);return root;
 }
 function walkBuildGallery(){
@@ -2964,7 +2980,7 @@ function walkRefreshItem(it){
         material.map=walkTextureForItem(it);material.needsUpdate=true;previous?.dispose();
       }else if(mesh.userData.galleryLabel){
         const material=mesh.material,previous=material.map;
-        material.map=walkLabelTexture(it.title,it.date||'TƯ LIỆU TRƯNG BÀY','#362018');material.needsUpdate=true;previous?.dispose();
+        material.map=walkLabelTexture(walkGalleryLabelText(it.title),walkGalleryLabelText(it.date||'TƯ LIỆU TRƯNG BÀY'),'#362018');material.needsUpdate=true;previous?.dispose();
       }
     });
   });
