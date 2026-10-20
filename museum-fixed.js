@@ -1251,7 +1251,6 @@ function tourPause(){
 
 /* ====================== SỰ KIỆN CHÍNH ====================== */
 $('#enterBtn').onclick=e=>userNav('hall',null,{x:e.clientX,y:e.clientY});
-$('#entryTour').onclick=startTour;
 $('#entryEd').onclick=openEditor;
 $('#edBtn').onclick=openEditor;
 $('#tourStart').onclick=startTour;

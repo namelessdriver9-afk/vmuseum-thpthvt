@@ -39,11 +39,13 @@ body[data-view=entry] .topbar{display:none}
 /* ---------- Entry ---------- */
 #entry{background:radial-gradient(ellipse at 50% 18%,#6a2326 0,#2a1012 55%,#0d0605 100%)}
 #entry.active{display:flex;align-items:center;justify-content:center;padding:24px}
-.arch{max-width:660px;width:100%;text-align:center;padding:64px 40px 34px;border:2px solid var(--line);border-radius:300px 300px 10px 10px;background:linear-gradient(rgba(255,255,255,.05),rgba(0,0,0,.28));box-shadow:inset 0 0 90px rgba(0,0,0,.7),0 0 90px rgba(184,138,62,.14)}
+.arch{max-width:900px;width:100%;text-align:center;padding:72px 56px 42px;border:2px solid var(--line);border-radius:420px 420px 10px 10px;background:linear-gradient(rgba(255,255,255,.05),rgba(0,0,0,.28));box-shadow:inset 0 0 90px rgba(0,0,0,.7),0 0 90px rgba(184,138,62,.14)}
+.arch .school-name{font-family:var(--sans);font-size:.95rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--brass-2);margin-bottom:5px}
 .arch .eyebrow{font-family:var(--serif);font-style:italic;color:var(--brass-2);font-size:1.05rem}
 .arch h1{font-family:var(--serif);font-size:clamp(1.9rem,5vw,3rem);line-height:1.2;margin:.35em 0 .3em;color:var(--cream)}
 .arch .sub{color:var(--muted);max-width:44ch;margin:0 auto 26px}
 .entry-btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:22px}
+@media(max-width:600px){.arch{padding:56px 22px 30px;border-radius:240px 240px 10px 10px}}
 
 /* ---------- Hall ---------- */
 #hall{padding:70px 4vw 140px;background:radial-gradient(ellipse 90% 40% at 50% 0,#6b2a2d 0,transparent 70%),repeating-linear-gradient(90deg,var(--lacquer) 0 110px,var(--lacquer-2) 110px 220px)}
